@@ -1,7 +1,10 @@
 const fs = require("fs");
 
 const raw = fs.readFileSync("progress.txt", "utf-8");
-const lines = raw.split("\n").map((line) => line.trim());
+const lines = raw
+  .split("\n")
+  .filter((line) => !!line)
+  .map((line) => line.trim());
 
 const words = [];
 const hiragana = [];
