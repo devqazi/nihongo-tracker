@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nihongo Tracker</title>
+    <style>
+      main {
+        max-width: 980px;
+        margin: 1rem auto;
+        text-align: center;
+      }
+      span {
+        font-size: 1.5rem;
+      }
+      span.done {
+        background-color: green;
+        color: white;
+      }
+      main > p {
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Sayam Qazi's Nihongo Tracker</h1>
+      <p>
+        <span id="kanji-count"></span>
+        <span id="word-count"></span>
+      </p>
+    </main>
+    <script>
+      (async () => {
+        const main = document.querySelector("main");
+        const kanjiRes = await fetch("kanji.txt");
+        const rawKanji = await kanjiRes.text();
+        const allKanji = rawKanji.trim().split("\n");
+
+        const progressRes = await fetch("progress.txt");
+        const rawProgress = await progressRes.text();
+        const progLines = rawProgress.split("\n").filter((v) => !!v);
+        const words = [];
+        const hiragana = [];
+
+        progLines.forEach((line) => {
+          const [word, hira] = line.split(/\s/);
+          words.push(word);
+          hiragana.push(hira);
+        });
+        const kanjiMap = {};
+        words.forEach((word) => {
+          const chars = word.split("");
+          chars.forEach((char) => {
+            if (/[一-龯]/u.test(char)) {
+              kanjiMap[char] = true;
+            }
+          });
+        });
+
+        const fragment = document.createDocumentFragment();
+        allKanji.forEach((k) => {
+          const e = document.createElement("span");
+          e.innerText = k;
+          if (kanjiMap[k]) {
+            e.classList.add("done");
+          }
+          fragment.appendChild(e);
+        });
+        main.appendChild(fragment);
+
+        document.querySelector("#kanji-count").innerText = `Kanji: ${
+          Object.keys(kanjiMap).length
+        }`;
+        document.querySelector(
+          "#word-count"
+        ).innerText = `Words: ${hiragana.length}`;
+      })();
+    </script>
+  </body>
+</html>
